@@ -1,6 +1,9 @@
 from setuptools import setup
+import subprocess
 
 from sitesniffer import __version__
+
+subprocess.run("pip install -r requirements.txt", shell=True, check=True)
 
 setup(
     name='sitesniffer',

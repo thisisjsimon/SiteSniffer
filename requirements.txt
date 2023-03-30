@@ -1,0 +1,5 @@
+whois
+bs4
+idna
+colorama
+requests
