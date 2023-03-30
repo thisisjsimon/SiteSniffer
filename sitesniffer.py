@@ -14,6 +14,8 @@ from colorama import Fore, Style
 colorama.init()
 
 
+__version__: str = "0.2"
+
 
 # Error codes
 ERROR_INVALID_URL = "INVALID_URL"
@@ -56,6 +58,16 @@ def get_status_code(url):
     except requests.exceptions.RequestException as e:
         raise Exception(ERROR_STATUS_CODE_NOT_FOUND)
 
+# Function to check if a website is up and running:
+def check_website_accessibility(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except:
+        return False
 
 # Function to get a list of URLs on a page
 def get_links(url):
@@ -134,9 +146,53 @@ def get_page_meta_description(url):
     except requests.exceptions.RequestException as e:
         return None
 
+# Function to check if a website is using responsive design
+def check_mobile_friendly(url):
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1'}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except:
+        return False
 
+# Function to check if a website is using responsive design
+def check_responsive_design(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        meta_tags = soup.find_all('meta')
+        for tag in meta_tags:
+            if 'viewport' in tag.get('name', '').lower():
+                return True
+        return False
+    except:
+        return False
 
-# Function to get site information
+def check_cookies(url):
+    try:
+        response = requests.get(url)
+        if response.cookies:
+            return True
+        else:
+            return False
+    except:
+        return False
+
+def check_google_analytics(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        script_tags = soup.find_all('script')
+        for tag in script_tags:
+            if 'google-analytics.com/analytics.js' in tag.get('src', '').lower():
+                return True
+        return False
+    except:
+        return False
+
 def get_site_info(url):
     try:
         ip_address = get_ip_address(url)
@@ -147,6 +203,11 @@ def get_site_info(url):
         keywords = get_page_keywords(url)
         meta_description = get_page_meta_description(url)
         links = get_links(url)
+        mobile_friendly = check_mobile_friendly(url)
+        responsive_design = check_responsive_design(url)
+        has_cookies = check_cookies(url)
+        has_google_analytics = check_google_analytics(url)
+        is_accessible = check_website_accessibility(url)
         return {
             'url': url,
             'ip_address': ip_address,
@@ -156,7 +217,12 @@ def get_site_info(url):
             'load_time': load_time,
             'meta_description': meta_description,
             'keywords': keywords,
-            'links' : links
+            'links' : links,
+            'mobile_friendly': mobile_friendly,
+            'responsive_design': responsive_design,
+            'has_cookies': has_cookies,
+            'has_google_analytics': has_google_analytics,
+            'is_accessible': is_accessible
         }
     except Exception as e:
         raise Exception(ERROR_SITE_INFO_NOT_FOUND)
@@ -165,4 +231,4 @@ def print_dictionary(d):
     for key, value in d.items():
         print(f"\033[32m{key}\033[0m: \033[37m{value}\033[0m")
 
-print_dictionary(get_site_info("url"))
+print_dictionary(get_site_info("https://youtube.com"))
