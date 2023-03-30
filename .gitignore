@@ -1,3 +1,5 @@
 /.DS_Store
-/sitesniffer.egg-info/
-/__pycache__/
+/sitesniffer.egg-info
+/__pycache__
+/dist
+/build
