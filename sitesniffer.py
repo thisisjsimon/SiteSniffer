@@ -219,7 +219,3 @@ def get_site_info(url: str) -> Dict[str, Any]:
         raise Exception(ERROR_SITE_INFO_NOT_FOUND)
 
 
-# Function to display a dictionary more clearly
-def print_dictionary(d: Dict[str, str]) -> None:
-    for key, value in d.items():
-        print(f"\033[32m{key}\033[0m: \033[37m{value}\033[0m")
