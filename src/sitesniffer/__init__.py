@@ -7,7 +7,7 @@ The class can extract the protocol, hostname, path, IP address, domain informati
 from __future__ import annotations
 
 __all__: list[str] = ["SiteSniffer", "DomainInfo", "SiteSnifferException"]
-__version__: str = "0.3"
+__version__: str = "0.3.1"
 __author__: str = "Jonah Simon"
 __title__: str = "sitesniffer"
 __license__: str = "MIT"

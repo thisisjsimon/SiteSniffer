@@ -1,7 +1,8 @@
 # Site Sniffer in Python 🐽
 
-The Site Sniffer project is a Python program that allows users to gather information about a website by providing its URL. The program extracts various details about the website, including the IP address, HTTP status code, SSL certificate information, domain registration details, load time, meta description, keywords, and a list of links on the page. It is intended for anyone who needs to perform website analysis, including web developers, SEO specialists, and website owners.
+Site Sniffer is a Python package designed to extract information about a website by providing its URL. It is useful for individuals who need to perform website analysis, including web developers, SEO specialists, and website owners. The package extracts various details such as the IP address, HTTP status code, SSL certificate information, domain registration details, load time, meta description, keywords, and a list of links on the page.
 
+#
 
 ## Installation
 
@@ -11,27 +12,76 @@ Install sitesniffer with pip
   pip install sitesniffer
 ```
 
+## Usage
+To use SiteSniffer, you need to import it first:
+```bash
+  from sitesniffer import SiteSniffer
+```
+
+Then, create an instance of the SiteSniffer class by providing the URL of the website you want to analyze:
+```bash
+  sniffer = SiteSniffer('https://example.com')
+```
+
+You can then call the methods of the SiteSniffer object to get various details about the website:
+```bash
+  print(sniffer.ip_address())
+  print(sniffer.domain_info())
+  print(sniffer.status_code())
+  # See docs for full list
+```
+
+Each of the methods in this package returns the corresponding detail of the website. For example, get_ip_address() returns the IP address of the website.
+
+## Example
+
+```bash
+  from sitesniffer import SiteSniffer
+
+  sniffer = SiteSniffer('https://google.com')
+  print(sniffer.ip_address())
+```
+## Output
+```bash
+  142.250.185.110
+```
+#
+
 ## Essential Python Libraries for Web Scraping and HTTP Requests
 
-The requests library is used for sending HTTP requests and receiving responses. The socket, ssl, and idna libraries are used for working with IP addresses and SSL certificates. The whois library is used for querying WHOIS information for a domain. The re library is used for working with regular expressions. The time library is used for timing how long it takes to load a webpage. The BeautifulSoup library is used for parsing HTML.
+The following Python libraries are essential for working with the Site Sniffer package:
+
+* requests: used for sending HTTP requests and receiving responses.
+* socket, ssl, and idna: used for working with IP addresses and SSL certificates.
+* whois: used for querying WHOIS information for a domain.
+* re: used for working with regular expressions.
+* time: used for timing how long it takes to load a webpage.
+* BeautifulSoup: used for parsing HTML.
 
 
 
-## The defined functions included:
+## The defined functions included (docs):
 
 | Function Name  | Function Description |
 | ------------- | ------------- |
-| extract_hostname(url)  | Extracts the hostname from a URL  |
-| get_ip_address(url)  | Gets the IP address of a domain  |
-|get_domain_info(url)| Gets domain information for a website |
-|get_status_code(url)|Gets the HTTP status code of a URL|
-|get_ssl_info(url)|Gets SSL certificate information for a domain|
-|get_load_time(url)| Gets the load time for a website and its sub-pages |
-|get_page_meta_description(url)| Gets the meta description for a page |
-|get_page_keywords(url)| Gets the meta keywords for a page |
-|get_links(url)|Gets a list of URLs on a page|
-|check_mobile_friendly(url)| Checks if a website is using mobile-friendly design |
-|check_responsive_design(url)| Checks if a website is using responsive design |
-|check_cookies(url)| Checks if a website is using cookies|
-|check_google_analytics|Checks if a website is using Google Analytic|
-|get_site_info|Returns all website information|
+| SiteSniffer | A class for extracting information about a website, such as its IP address, SSL certificate information, and load time. |
+| extract_protocol | Extracts the protocol from the URL. |
+| extract_hostname | Extracts the hostname from the URL. |
+| extract_path | Extracts the path from the URL. |
+| ip_address | Returns the IP address of the domain. |
+| domain_info | Returns the domain information for the website. |
+| status_code | Returns the HTTP status code of the website. |
+| ssl_info | Returns the SSL certificate information for the website. |
+| load_time | Returns the website's load time. |
+| links | Returns a list of links found on the website. |
+| is_mobile_friendly | Checks if the website is mobile-friendly. |
+| has_responsive_design | Checks if the website has a responsive design. |
+| has_cookies | Checks if the website uses cookies. |
+| has_google_analytics | Checks if the website has Google Analytics installed. |
+| page_meta_description | Returns the website's meta description. |
+| has_meta_description | Checks if the website has a meta description. |
+| page_keywords | Returns the website's keywords. |
+| has_keywords | Checks if the website has keywords. |
+
+#
+[![License: MIT](https://img.shields.io/badge/License-MIT-darkgrey.svg)](https://opensource.org/licenses/MIT)

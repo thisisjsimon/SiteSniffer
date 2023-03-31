@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from __future__ import annotations
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 from src.sitesniffer import __author__, __license__, __title__, __version__
 
@@ -18,7 +18,8 @@ setup(
     author=__author__,
     author_email="thisisjsimon.github@gmail.com",
     license=__license__,
-    py_modules=[r"src/sitesniffer/"],
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     install_requires=["whois", "bs4", "idna", "requests"],
     extras_require={"dev": ["pytest", "twine"]},
 )
