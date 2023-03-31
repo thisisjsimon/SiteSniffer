@@ -1,34 +1,24 @@
-from setuptools import find_packages, setup
-import subprocess
+# -*- coding: UTF-8 -*-
+from __future__ import annotations
 
-from sitesniffer import __version__
+from setuptools import setup
 
-subprocess.run("pip install -r requirements.txt", shell=True, check=True)
+from src.sitesniffer import __author__, __license__, __title__, __version__
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
-
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description: str = f.read()
 
 setup(
-    name='sitesniffer',
+    name=__title__,
     version=__version__,
-    description='This is a Python script that can extract various information about a website, including its IP address, SSL certificate information, domain information, page load time, and other useful insights.',
+    description="This is a Python script that can extract various information about a website, including its IP address, SSL certificate information, domain information, page load time, and other useful insights.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/thisisjsimon/SiteSniffer',
-    author='Jonah Simon',
-    author_email='thisisjsimon.github@gmail.com',
-    license='MIT',
-    py_modules=['sitesniffer'],
-    install_requires=[
-        "whois",
-        "bs4",
-        "idna",
-        "colorama",
-        "requests"
-    ],
-    extras_require={
-        "dev": ["pytest>=7.0", "twine>=4.0.2"]
-    }
+    url="https://github.com/thisisjsimon/SiteSniffer",
+    author=__author__,
+    author_email="thisisjsimon.github@gmail.com",
+    license=__license__,
+    py_modules=[r"src/sitesniffer/"],
+    install_requires=["whois", "bs4", "idna", "requests"],
+    extras_require={"dev": ["pytest", "twine"]},
 )
