@@ -121,7 +121,7 @@ class SiteSniffer:
     def ip_address(self, /) -> str:
         """Returns the IP address of the domain."""
         domain: str = urlparse(self.url).netloc
-        return socket.gethostbyname(domain)
+        return socket.getaddrinfo(domain, None)[0][4][0]
 
     def domain_info(self, /) -> DomainInfo:
         """Returns the domain information for the website."""
@@ -195,7 +195,8 @@ class SiteSniffer:
 
     def has_cookies(self, /, *, timeout: int = 10) -> bool:
         """Checks whether the website is using cookies."""
-        return bool(requests.get(self.url, timeout=timeout).cookies)
+        response = requests.get(self.url, timeout=timeout)
+        return True if 'Set-Cookie' in response.headers else False
 
     def has_google_analytics(self, /, *, timeout: int = 10) -> bool:
         """Checks whether the website is using Google Analytic."""
