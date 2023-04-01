@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from setuptools import find_packages, setup
 
-from src.sitesniffer import __author__, __license__, __title__, __version__
+from sitesniffer.src import __author__, __license__, __title__, __version__
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description: str = f.read()
@@ -18,8 +18,7 @@ setup(
     author=__author__,
     author_email="thisisjsimon.github@gmail.com",
     license=__license__,
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=find_packages(),
     install_requires=["whois", "bs4", "idna", "requests"],
     extras_require={"dev": ["pytest", "twine"]},
 )
