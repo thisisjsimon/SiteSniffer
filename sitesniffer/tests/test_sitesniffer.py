@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture
 
 def sniffer():
-    return SiteSniffer("https://www.python.org/")
+    return SiteSniffer('https://www.python.org/')
 
 
 def test_extract_protocol(sniffer):
@@ -21,8 +21,12 @@ def test_extract_path(sniffer):
     assert sniffer.extract_path() == "/"
 
 
-#def test_ip_address(sniffer):
-#    assert sniffer.ip_address() == "151.101.2.223"
+def test_ip_address(sniffer): #failed
+    assert sniffer.ip_address() == "151.101.2.223"
+
+def test_valid_ip_address(sniffer): #sometimes failed
+    ip = sniffer.ip_address()
+    assert ip is not None and ip != "" and all(part.isdigit() and 0 <= int(part) <= 255 for part in ip.split(".")), "Returned IP address is invalid"
 
 
 def test_domain_info(sniffer):
@@ -49,20 +53,20 @@ def test_links(sniffer):
     assert len(sniffer.links()) > 0
 
 
-#def test_is_mobile_friendly(sniffer):
-#    assert sniffer.is_mobile_friendly() == False
+def test_is_mobile_friendly(sniffer): #failed
+    assert sniffer.is_mobile_friendly() == False
 
 
 def test_has_responsive_design(sniffer):
     assert sniffer.has_responsive_design() == True
 
 
-#def test_has_cookies(sniffer):
-#    assert sniffer.has_cookies() == True
+def test_has_cookies(sniffer): #failed
+    assert sniffer.has_cookies() == True
 
 
-#def test_has_google_analytics(sniffer):
-#   assert sniffer.has_google_analytics() == True
+def test_has_google_analytics(sniffer): #failed
+   assert sniffer.has_google_analytics() == True
 
 
 def test_page_meta_description(sniffer):
@@ -73,8 +77,8 @@ def test_has_meta_description(sniffer):
     assert sniffer.has_meta_description() == True
 
 
-#def test_page_keywords(sniffer):
-#    assert "Python, programming language, documentation, community" in sniffer.page_keywords()
+def test_page_keywords(sniffer):
+    assert "Python, programming language, documentation, community" in sniffer.page_keywords()
 
 
 def test_has_keywords(sniffer):
