@@ -25,7 +25,7 @@ extend-select = [
     "BLE",
     "FBT"
 ]
-ignore = ["E501", "BLE001", "INP001", "PLR2004"]
+ignore = ["E501", "BLE001", "INP001", "PLR2004", "SLF001", "E1101"]
 unfixable = []
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 show-fixes = true

@@ -6,65 +6,85 @@ Site Sniffer is a Python package designed to extract information about a website
 
 ## Installation
 
-Install sitesniffer with pip
+Install sitesniffer with pip:
 
 ```bash
-  pip install sitesniffer
+pip install sitesniffer
+```
+
+Alternativly:
+
+```bash
+pip install git+https://github.com/thisisjsimon/SiteSniffer.git
 ```
 
 ## Usage
+
 To use SiteSniffer, you need to import it first:
-```bash
-  from sitesniffer import SiteSniffer
+
+```py
+from sitesniffer import SiteSniffer
 ```
 
 Then, create an instance of the SiteSniffer class by providing the URL of the website you want to analyze:
-```bash
-  sniffer = SiteSniffer('https://example.com')
+
+```py
+sniffer = SiteSniffer('https://example.com')
 ```
 
 You can then call the methods of the SiteSniffer object to get various details about the website:
-```bash
-  print(sniffer.ip_address())
-  print(sniffer.domain_info())
-  print(sniffer.status_code())
-  # See docs for full list
+
+```py
+print(sniffer.ip_address())
+print(sniffer.domain_info())
+print(sniffer.status_code())
+# See docs for full list
 ```
 
 Each of the methods in this package returns the corresponding detail of the website. For example, get_ip_address() returns the IP address of the website.
 
 ## Example
 
-```bash
-  from sitesniffer import SiteSniffer
+```py
+from sitesniffer import SiteSniffer
 
-  sniffer = SiteSniffer('https://google.com')
-  print(sniffer.ip_address())
+sniffer = SiteSniffer('https://google.com')
+print(sniffer.ip_address())
 ```
+
 ## Output
-```bash
-  142.250.185.110
+
+```py
+'142.250.185.110'
 ```
+
 #
 
 ## Essential Python Libraries for Web Scraping and HTTP Requests
 
-The following Python libraries are essential for working with the Site Sniffer package:
+The following Python libraries are essential for working with the ``sitesniffer`` package:
 
-* requests: used for sending HTTP requests and receiving responses.
-* socket, ssl, and idna: used for working with IP addresses and SSL certificates.
-* whois: used for querying WHOIS information for a domain.
-* re: used for working with regular expressions.
-* time: used for timing how long it takes to load a webpage.
-* BeautifulSoup: used for parsing HTML.
+```py
+# standard library
+import re
+import socket
+import ssl
+import time
+import typing
+import urllib.parse
+import dataclasses
 
+# third party
+import bs4
+import idna
+import requests
+import whois
+```
 
-
-## The defined functions included (docs):
+## The defined functions included in ``SiteSniffer`` (docs)
 
 | Function Name  | Function Description |
 | ------------- | ------------- |
-| SiteSniffer | A class for extracting information about a website, such as its IP address, SSL certificate information, and load time. |
 | extract_protocol | Extracts the protocol from the URL. |
 | extract_hostname | Extracts the hostname from the URL. |
 | extract_path | Extracts the path from the URL. |
@@ -84,4 +104,5 @@ The following Python libraries are essential for working with the Site Sniffer p
 | has_keywords | Checks if the website has keywords. |
 
 #
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-darkgrey.svg)](https://opensource.org/licenses/MIT)
