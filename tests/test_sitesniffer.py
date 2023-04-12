@@ -9,6 +9,9 @@ import pytest
 from src.sitesniffer import SiteSniffer
 from src.sitesniffer.exceptions import SiteSnifferException
 
+# pylint: disable=redefined-outer-name
+# pylint: disable=missing-function-docstring
+
 
 @pytest.fixture
 def sniffer() -> SiteSniffer:
@@ -81,7 +84,7 @@ def test_domain_info(sniffer: SiteSniffer) -> None:
         "registrar_abuse_contact_email": None,
         "registrar_abuse_contact_phone": None,
     }
-    assert sniffer.domain_info().as_no_none_dict() == {
+    assert sniffer.domain_info().as_dict_without_none() == {
         "domain_name": "EXAMPLE.COM",
         "registrar": "RESERVED-Internet Assigned Numbers Authority",
         "whois_server": "whois.iana.org",

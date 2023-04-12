@@ -13,6 +13,6 @@ __author__: str = "Jonah Simon"
 __email__ = "thisisjsimon.github@gmail.com"
 __title__: str = "sitesniffer"
 __license__: str = "MIT"
-__copyright__: str = "Copyright (c) 2023 thisisjsimon\nCopyright (c) 2023 realshouzy"
+__copyright__: str = "Copyright (c) 2023 thisisjsimon"
 
 from ._sitesniffer import SiteSniffer

@@ -69,7 +69,7 @@ class DomainInfo:
             for key in self.__annotations__  # pylint: disable=no-member
         }
 
-    def as_no_none_dict(self, /) -> dict[str, WhoisEntry]:
+    def as_dict_without_none(self, /) -> dict[str, WhoisEntry]:
         """Returns the dataclass a a dictionary but with all the ``None`` value-keys missing."""
         return {key: val for key, val in self.as_dict().items() if val is not None}
 
