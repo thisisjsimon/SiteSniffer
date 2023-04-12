@@ -69,11 +69,11 @@ class SiteSniffer:
 
         ``has_google_analytics(*, timeout: int = 10) -> bool``
 
-        ``page_meta_description(*, timeout: int = 10) -> Optional[str | list[str] | Any]``
+        ``page_meta_description(*, timeout: int = 10) -> str | list[str] | Any``
 
         ``has_meta_description(*, timeout: int = 10) -> bool``
 
-        ``page_keywords(*, timeout: int = 10) -> Optional[str | list[str] | Any]``
+        ``page_keywords(*, timeout: int = 10) -> str | list[str] | Any``
 
         ``has_keywords(*, timeout: int = 10) -> bool``
 
@@ -274,7 +274,7 @@ class SiteSniffer:
         /,
         *,
         timeout: int = 10,
-    ) -> Optional[str | list[str] | Any]:
+    ) -> str | list[str] | Any:
         """Returns the meta description for the webpage, given its URL."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -282,13 +282,13 @@ class SiteSniffer:
             "meta",
             attrs={"name": "description"},
         )
-        return meta_description.get("content") if meta_description else None  # type: ignore
+        return meta_description.get("content") if meta_description else []  # type: ignore
 
     def has_meta_description(self, /, *, timeout: int = 10) -> bool:
         """Checks whether the website is a meta description."""
-        return self.page_meta_description(timeout=timeout) is not None
+        return bool(self.page_meta_description(timeout=timeout))
 
-    def page_keywords(self, /, *, timeout: int = 10) -> Optional[str | list[str] | Any]:
+    def page_keywords(self, /, *, timeout: int = 10) -> str | list[str] | Any:
         """Returns the meta keywords for the webpage, given its URL."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -296,8 +296,8 @@ class SiteSniffer:
             "meta",
             attrs={"name": "keywords"},
         )
-        return meta_keywords.get("content") if meta_keywords else None  # type: ignore
+        return meta_keywords.get("content") if meta_keywords else []  # type: ignore
 
     def has_keywords(self, /, *, timeout: int = 10) -> bool:
         """Checks whether the website has keywords."""
-        return self.page_keywords(timeout=timeout) is not None
+        return bool(self.page_keywords(timeout=timeout))
