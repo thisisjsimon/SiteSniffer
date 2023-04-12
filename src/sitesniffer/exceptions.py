@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """This module defines a custom exception class named SiteSnifferException, which is used in the sitesniffer package."""
 from __future__ import annotations

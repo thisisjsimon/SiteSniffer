@@ -1,4 +1,4 @@
-whois
+python-whois
 bs4
 idna
 requests
