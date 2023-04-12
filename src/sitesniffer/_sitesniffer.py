@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Contains the SiteSniffer class."""
 from __future__ import annotations
 
 import re

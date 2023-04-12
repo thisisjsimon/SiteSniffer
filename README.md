@@ -1,8 +1,13 @@
 # Site Sniffer in Python 🐽
 
-Site Sniffer is a Python package designed to extract information about a website by providing its URL. It is useful for individuals who need to perform website analysis, including web developers, SEO specialists, and website owners. The package extracts various details such as the IP address, HTTP status code, SSL certificate information, domain registration details, load time, meta description, keywords, and a list of links on the page.
+[![PyPi version](https://img.shields.io/pypi/v/sitesniffer)](https://pypi.org/project/sitesniffer/)
+[![PyPi downloads](https://img.shields.io/pypi/dm/sitesniffer)](https://pypi.org/project/sitesniffer/)
+[![Github commits](https://img.shields.io/github/commit-activity/m/thisisjsimon/SiteSniffer)](https://github.com/thisisjsimon/SiteSniffer/commits/main)
+[![Github contributors](https://img.shields.io/github/contributors/thisisjsimon/SiteSniffer)](https://github.com/thisisjsimon/SiteSniffer/graphs/contributors)
+[![Code size](https://img.shields.io/github/languages/code-size/thisisjsimon/SiteSniffer)](https://github.com/thisisjsimon/SiteSniffer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-#
+Site Sniffer is a Python package designed to extract information about a website by providing its URL. It is useful for individuals who need to perform website analysis, including web developers, SEO specialists, and website owners. The package extracts various details such as the IP address, HTTP status code, SSL certificate information, domain registration details, load time, meta description, keywords, and a list of links on the page.
 
 ## Installation
 
@@ -52,13 +57,11 @@ sniffer = SiteSniffer('https://google.com')
 print(sniffer.ip_address())
 ```
 
-## Output
+### Output
 
 ```py
 '142.250.185.110'
 ```
-
-#
 
 ## Essential Python Libraries for Web Scraping and HTTP Requests
 
@@ -81,28 +84,26 @@ import requests
 import whois
 ```
 
-## The defined functions included in ``SiteSniffer`` (docs)
+## Docs
+
+### The defined functions included in ``SiteSniffer``
 
 | Function Name  | Function Description |
 | ------------- | ------------- |
-| extract_protocol | Extracts the protocol from the URL. |
-| extract_hostname | Extracts the hostname from the URL. |
-| extract_path | Extracts the path from the URL. |
-| ip_address | Returns the IP address of the domain. |
-| domain_info | Returns the domain information for the website. |
-| status_code | Returns the HTTP status code of the website. |
-| ssl_info | Returns the SSL certificate information for the website. |
-| load_time | Returns the website's load time. |
-| links | Returns a list of links found on the website. |
-| is_mobile_friendly | Checks if the website is mobile-friendly. |
-| has_responsive_design | Checks if the website has a responsive design. |
-| has_cookies | Checks if the website uses cookies. |
-| has_google_analytics | Checks if the website has Google Analytics installed. |
-| page_meta_description | Returns the website's meta description. |
-| has_meta_description | Checks if the website has a meta description. |
-| page_keywords | Returns the website's keywords. |
-| has_keywords | Checks if the website has keywords. |
-
-#
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-darkgrey.svg)](https://opensource.org/licenses/MIT)
+| ``extract_protocol`` | Extracts the protocol from the URL. |
+| ``extract_hostname`` | Extracts the hostname from the URL. |
+| ``extract_path`` | Extracts the path from the URL. |
+| ``ip_address`` | Returns the IP address of the domain. |
+| ``domain_info`` | Returns the domain information for the website. |
+| ``status_code`` | Returns the HTTP status code of the website. |
+| ``ssl_info`` | Returns the SSL certificate information for the website. |
+| ``load_time`` | Returns the website's load time. |
+| ``links`` | Returns a list of links found on the website. |
+| ``is_mobile_friendly`` | Checks if the website is mobile-friendly. |
+| ``has_responsive_design`` | Checks if the website has a responsive design. |
+| ``has_cookies`` | Checks if the website uses cookies. |
+| ``has_google_analytics`` | Checks if the website has Google Analytics installed. |
+| ``page_meta_description`` | Returns the website's meta description. |
+| ``has_meta_description`` | Checks if the website has a meta description. |
+| ``page_keywords`` | Returns the website's keywords. |
+| ``has_keywords`` | Checks if the website has keywords. |
