@@ -31,4 +31,5 @@ setup(
         "domain",
         "website",
     ],
+    python_requires=">=3.11",
 )

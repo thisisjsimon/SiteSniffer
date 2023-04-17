@@ -1,11 +1,13 @@
 # Site Sniffer in Python 🐽
 
 [![PyPi version](https://img.shields.io/pypi/v/sitesniffer)](https://pypi.org/project/sitesniffer/)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![PyPi downloads](https://img.shields.io/pypi/dm/sitesniffer)](https://pypi.org/project/sitesniffer/)
 [![Github commits](https://img.shields.io/github/commit-activity/m/thisisjsimon/SiteSniffer)](https://github.com/thisisjsimon/SiteSniffer/commits/main)
 [![Github contributors](https://img.shields.io/github/contributors/thisisjsimon/SiteSniffer)](https://github.com/thisisjsimon/SiteSniffer/graphs/contributors)
 [![Code size](https://img.shields.io/github/languages/code-size/thisisjsimon/SiteSniffer)](https://github.com/thisisjsimon/SiteSniffer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 Site Sniffer is a Python package designed to extract information about a website by providing its URL. It is useful for individuals who need to perform website analysis, including web developers, SEO specialists, and website owners. The package extracts various details such as the IP address, HTTP status code, SSL certificate information, domain registration details, load time, meta description, keywords, and a list of links on the page.
 
@@ -24,6 +26,10 @@ pip install git+https://github.com/thisisjsimon/SiteSniffer.git
 ```
 
 ## Usage
+
+ Make sure that you have installed Python 3.11 before proceeding.
+ 
+
 
 To use SiteSniffer, you need to import it first:
 
