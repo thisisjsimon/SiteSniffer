@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as readme:
 
 setup(
     name="sitesniffer",
-    version="0.4",
+    version="0.4.1",
     description="This is a Python script that can extract various information about a website, including its IP address, SSL certificate information, domain information, page load time, and other useful insights.",
     long_description=long_description,
     long_description_content_type="text/markdown",

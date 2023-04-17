@@ -8,7 +8,7 @@ The class can extract the protocol, hostname, path, IP address, domain informati
 from __future__ import annotations
 
 __all__: list[str] = ["SiteSniffer"]
-__version__: str = "0.4"
+__version__: str = "0.4.1"
 __author__: str = "Jonah Simon"
 __email__ = "thisisjsimon.github@gmail.com"
 __title__: str = "sitesniffer"
