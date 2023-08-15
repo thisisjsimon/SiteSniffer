@@ -9,8 +9,7 @@ import pytest
 from src.sitesniffer import SiteSniffer
 from src.sitesniffer.exceptions import SiteSnifferException
 
-# pylint: disable=redefined-outer-name
-# pylint: disable=missing-function-docstring
+# pylint: disable=redefined-outer-name, missing-function-docstring
 
 
 @pytest.fixture
@@ -36,18 +35,21 @@ def test_extract_path(sniffer: SiteSniffer) -> None:
 
 
 def test_ip_address(sniffer: SiteSniffer) -> None:
-    assert sniffer.ip_address() == "93.184.216.34"
+    assert sniffer.ip_address() == {
+        "ipv6": "2606:2800:220:1:248:1893:25c8:1946",
+        "ipv4": "93.184.216.34",
+    }
 
 
 def test_domain_info(sniffer: SiteSniffer) -> None:
-    assert sniffer.domain_info().as_dict() == {
+    assert sniffer.domain_info()._asdict() == {
         "domain_name": "EXAMPLE.COM",
         "registrar": "RESERVED-Internet Assigned Numbers Authority",
         "whois_server": "whois.iana.org",
         "referral_url": None,
-        "updated_date": datetime.datetime(2022, 8, 14, 7, 1, 31),
+        "updated_date": datetime.datetime(2023, 8, 14, 7, 1, 38),
         "creation_date": datetime.datetime(1995, 8, 14, 4, 0),
-        "expiration_date": datetime.datetime(2023, 8, 13, 4, 0),
+        "expiration_date": datetime.datetime(2024, 8, 13, 4, 0),
         "name_servers": ["A.IANA-SERVERS.NET", "B.IANA-SERVERS.NET"],
         "status": [
             "clientDeleteProhibited https://icann.org/epp#clientDeleteProhibited",
@@ -84,13 +86,13 @@ def test_domain_info(sniffer: SiteSniffer) -> None:
         "registrar_abuse_contact_email": None,
         "registrar_abuse_contact_phone": None,
     }
-    assert sniffer.domain_info().as_dict_without_none() == {
+    assert sniffer.domain_info()._asdict_without_none() == {
         "domain_name": "EXAMPLE.COM",
         "registrar": "RESERVED-Internet Assigned Numbers Authority",
         "whois_server": "whois.iana.org",
-        "updated_date": datetime.datetime(2022, 8, 14, 7, 1, 31),
+        "updated_date": datetime.datetime(2023, 8, 14, 7, 1, 38),
         "creation_date": datetime.datetime(1995, 8, 14, 4, 0),
-        "expiration_date": datetime.datetime(2023, 8, 13, 4, 0),
+        "expiration_date": datetime.datetime(2024, 8, 13, 4, 0),
         "name_servers": ["A.IANA-SERVERS.NET", "B.IANA-SERVERS.NET"],
         "status": [
             "clientDeleteProhibited https://icann.org/epp#clientDeleteProhibited",
@@ -106,7 +108,7 @@ def test_status_code(sniffer: SiteSniffer) -> None:
 
 
 def test_ssl_info(sniffer: SiteSniffer) -> None:
-    assert sniffer.ssl_info().as_dict() == {
+    assert sniffer.ssl_info()._asdict() == {
         "subject": (
             (("countryName", "US"),),
             (("stateOrProvinceName", "California"),),
@@ -158,7 +160,7 @@ def test_links(sniffer: SiteSniffer) -> None:
 
 
 def test_is_mobile_friendly(sniffer: SiteSniffer) -> None:
-    assert sniffer.is_mobile_friendly() is False
+    assert not sniffer.is_mobile_friendly()
 
 
 def test_has_responsive_design(sniffer: SiteSniffer) -> None:
@@ -166,24 +168,24 @@ def test_has_responsive_design(sniffer: SiteSniffer) -> None:
 
 
 def test_has_cookies(sniffer: SiteSniffer) -> None:
-    assert sniffer.has_cookies() is False
+    assert not sniffer.has_cookies()
 
 
 def test_has_google_analytics(sniffer: SiteSniffer) -> None:
-    assert sniffer.has_google_analytics() is False
+    assert not sniffer.has_google_analytics()
 
 
 def test_page_meta_description(sniffer: SiteSniffer) -> None:
-    assert sniffer.page_meta_description() is None
+    assert not sniffer.page_meta_description()
 
 
 def test_has_meta_description(sniffer: SiteSniffer) -> None:
-    assert sniffer.has_meta_description() is False
+    assert not sniffer.has_meta_description()
 
 
 def test_page_keywords(sniffer: SiteSniffer) -> None:
-    assert sniffer.page_keywords() is None
+    assert not sniffer.page_keywords()
 
 
 def test_has_keywords(sniffer: SiteSniffer) -> None:
-    assert sniffer.has_keywords() is False
+    assert not sniffer.has_keywords()

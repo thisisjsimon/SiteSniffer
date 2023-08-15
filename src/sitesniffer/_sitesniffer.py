@@ -89,51 +89,58 @@ class SiteSniffer:
     For more documentation go to https://github.com/thisisjsimon/SiteSniffer
     """
 
-    __slots__: tuple[Literal["__url"], Literal["__dict__"]] = ("__url", "__dict__")
+    __slots__: tuple[Literal["_url"], Literal["__dict__"]] = ("_url", "__dict__")
 
     def __init__(self, url: str) -> None:
         if not re.match(_URL_PATTERN, url):
             raise SiteSnifferException(f"Invalid URL: {url}")
-        self.__url: str = url
+        self._url: str = url
 
     def __hash__(self) -> int:
-        return hash(self.url)
+        return hash((self.__class__, self.url))
 
     def __reduce__(self) -> tuple[type[Self], tuple[str]]:
         return self.__class__, (self.url,)
 
-    def __repr__(self, /) -> str:
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(url={self.url!r})"
 
     @property
-    def url(self, /) -> str:
+    def url(self) -> str:
         """Returns the URL."""
-        return self.__url
+        return self._url
 
-    def __extract_from_pattern(self, capture_group: str) -> str:
+    def _extract_from_pattern(self, capture_group: str) -> str:
         re_match: Optional[re.Match[str]] = re.match(_URL_GROUPS, self.url)
         if not re_match:
             raise SiteSnifferException(f"Unable to exctract hostname from {self.url}")
         return re_match.group(capture_group)
 
-    def extract_protocol(self, /) -> str:
+    def extract_protocol(self) -> str:
         """Extracts the protocol from the URL."""
-        return self.__extract_from_pattern("protocol")
+        return self._extract_from_pattern("protocol")
 
-    def extract_hostname(self, /) -> str:
+    def extract_hostname(self) -> str:
         """Extracts the hostname from the URL."""
-        return self.__extract_from_pattern("hostname")
+        return self._extract_from_pattern("hostname")
 
-    def extract_path(self, /) -> str:
+    def extract_path(self) -> str:
         """Extracts the path from the URL."""
-        return self.__extract_from_pattern("path")
+        return self._extract_from_pattern("path")
 
-    def ip_address(self, /) -> str:
-        """Returns the IP address of the domain."""
-        domain: str = urlparse(self.url).netloc
-        return socket.getaddrinfo(domain, None)[0][4][0]
+    def ip_address(self) -> dict:
+        domain = urlparse(self.url).netloc
+        ip_addresses = {}
+        for result in socket.getaddrinfo(domain, 0, flags=socket.AI_CANONNAME):
+            ip_version = result[0]
+            ip_address = result[4][0]
+            if ip_version == socket.AF_INET:
+                ip_addresses["ipv4"] = ip_address
+            elif ip_version == socket.AF_INET6:
+                ip_addresses["ipv6"] = ip_address
+        return ip_addresses
 
-    def domain_info(self, /) -> DomainInfo:
+    def domain_info(self) -> DomainInfo:
         """Returns the domain information for the website."""
         whois_entry: WhoisEntry = whois.whois(self.url)
         return DomainInfo(
@@ -177,11 +184,11 @@ class SiteSniffer:
             registrar_abuse_contact_phone=whois_entry.registrar_abuse_contact_phone,
         )
 
-    def status_code(self, /, *, timeout: int = 10) -> int:
+    def status_code(self, *, timeout: int = 10) -> int:
         """Returns the HTTP status code of the URL."""
         return requests.get(self.url, timeout=timeout).status_code
 
-    def ssl_info(self, /) -> SSLCertInfo:
+    def ssl_info(self) -> SSLCertInfo:
         """Returns SSL certificate information for the domain if fetchable otherwise it throws an exception."""
         hostname: str = self.extract_hostname()
         # encode hostname using Punycode if it contains non-ASCII characters
@@ -212,7 +219,7 @@ class SiteSniffer:
             clr_distribution_points=ssl_info_dict["crlDistributionPoints"],
         )
 
-    def load_time(self, /, *, ndigits: int = 3, timeout: int = 10) -> float:
+    def load_time(self, *, ndigits: int = 3, timeout: int = 10) -> float:
         """Returns the load time for the website and its sub-pages."""
         start_time: float = time.perf_counter()
 
@@ -225,7 +232,7 @@ class SiteSniffer:
 
         return round(end_time - start_time, ndigits=ndigits)
 
-    def links(self, /, *, timeout: int = 10) -> list[str]:
+    def links(self, *, timeout: int = 10) -> list[str]:
         """Returns a list of URLs on the page."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -239,7 +246,7 @@ class SiteSniffer:
             for href in valid_hrefs
         ]
 
-    def is_mobile_friendly(self, /, *, timeout: int = 10) -> bool:
+    def is_mobile_friendly(self, *, timeout: int = 10) -> bool:
         """Checks whether the website is mobile friendly (not as reliable)."""
         headers: dict[str, str] = {
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
@@ -248,7 +255,7 @@ class SiteSniffer:
             requests.get(self.url, headers=headers, timeout=timeout).status_code == 200
         )
 
-    def has_responsive_design(self, /, *, timeout: int = 10) -> bool:
+    def has_responsive_design(self, *, timeout: int = 10) -> bool:
         """Checks whether the website is using a responsive design."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -256,11 +263,11 @@ class SiteSniffer:
             "viewport" in tag.get("name", "").lower() for tag in soup.find_all("meta")
         )
 
-    def has_cookies(self, /, *, timeout: int = 10) -> bool:
+    def has_cookies(self, *, timeout: int = 10) -> bool:
         """Checks whether the website is using cookies (not as reliable)."""
         return "Set-Cookie" in requests.get(self.url, timeout=timeout).headers
 
-    def has_google_analytics(self, /, *, timeout: int = 10) -> bool:
+    def has_google_analytics(self, *, timeout: int = 10) -> bool:
         """Checks whether the website is using Google Analytic."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -271,7 +278,6 @@ class SiteSniffer:
 
     def page_meta_description(
         self,
-        /,
         *,
         timeout: int = 10,
     ) -> str | list[str] | Any:
@@ -284,11 +290,11 @@ class SiteSniffer:
         )
         return meta_description.get("content") if meta_description else []  # type: ignore
 
-    def has_meta_description(self, /, *, timeout: int = 10) -> bool:
+    def has_meta_description(self, *, timeout: int = 10) -> bool:
         """Checks whether the website is a meta description."""
         return bool(self.page_meta_description(timeout=timeout))
 
-    def page_keywords(self, /, *, timeout: int = 10) -> str | list[str] | Any:
+    def page_keywords(self, *, timeout: int = 10) -> str | list[str] | Any:
         """Returns the meta keywords for the webpage, given its URL."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -298,6 +304,6 @@ class SiteSniffer:
         )
         return meta_keywords.get("content") if meta_keywords else []  # type: ignore
 
-    def has_keywords(self, /, *, timeout: int = 10) -> bool:
+    def has_keywords(self, *, timeout: int = 10) -> bool:
         """Checks whether the website has keywords."""
         return bool(self.page_keywords(timeout=timeout))
