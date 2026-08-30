@@ -10,7 +10,7 @@ from sitesniffer.data import DomainInfo, SSLCertInfo
 
 def test_data_module_metadata() -> None:
     """Verify data module exports."""
-    assert data_mod.__all__ == ["DomainInfo", "SSLCertInfo", "WhoisEntry", "SSLCertDictEntry"]
+    assert data_mod.__all__ == ["DomainInfo", "SSLCertDictEntry", "SSLCertInfo", "WhoisEntry"]
 
 
 def test_domain_info_fields_and_types() -> None:

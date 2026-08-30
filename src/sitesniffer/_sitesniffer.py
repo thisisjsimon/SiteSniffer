@@ -7,7 +7,7 @@ import re
 import socket
 import ssl
 import time
-from typing import Any, Literal, Optional, Self
+from typing import Any, Literal, Optional
 from urllib.parse import urljoin, urlparse
 
 import bs4
@@ -22,7 +22,7 @@ __all__: list[str] = ["SiteSniffer"]
 
 _URL_PATTERN: re.Pattern[str] = re.compile(
     r"^(?:http|ftp)s?://"  # protocol
-    r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain
+    r"(?:(?:[A-Z0-9_\u00a1-\uffff](?:[A-Z0-9-_\u00a1-\uffff]{0,61}[A-Z0-9_\u00a1-\uffff])?\.)+(?:[A-Z0-9-_\u00a1-\uffff]{2,}\.?)|"  # domain with IDN support
     r"localhost|"  # localhost
     r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # IP address
     r"(?::\d+)?"  # port
@@ -89,7 +89,7 @@ class SiteSniffer:
     For more documentation go to https://github.com/thisisjsimon/SiteSniffer
     """
 
-    __slots__: tuple[Literal["_url"], Literal["__dict__"]] = ("_url", "__dict__")
+    __slots__: tuple[Literal["__dict__"], Literal["_url"]] = ("__dict__", "_url")
 
     def __init__(self, url: str) -> None:
         if not re.match(_URL_PATTERN, url):
@@ -99,7 +99,13 @@ class SiteSniffer:
     def __hash__(self) -> int:
         return hash((self.__class__, self.url))
 
-    def __reduce__(self) -> tuple[type[Self], tuple[str]]:
+    def __eq__(self, other: object) -> bool:
+        """Returns True if other is a SiteSniffer instance with the same URL."""
+        if not isinstance(other, self.__class__):
+            return False
+        return self.url == other.url
+
+    def __reduce__(self) -> tuple[type[SiteSniffer], tuple[str]]:
         return self.__class__, (self.url,)
 
     def __repr__(self) -> str:
@@ -144,44 +150,44 @@ class SiteSniffer:
         """Returns the domain information for the website."""
         whois_entry: WhoisEntry = whois.whois(self.url)
         return DomainInfo(
-            domain_name=whois_entry.domain_name,
-            registrar=whois_entry.registrar,
-            whois_server=whois_entry.whois_server,
-            referral_url=whois_entry.referral_url,
-            updated_date=whois_entry.updated_date,
-            creation_date=whois_entry.creation_date,
-            expiration_date=whois_entry.expiration_date,
-            name_servers=whois_entry.name_servers,
-            status=whois_entry.status,
-            emails=whois_entry.emails,
-            dnssec=whois_entry.dnssec,
-            registrant_name=whois_entry.registrant_name,
-            registrant_organization=whois_entry.registrant_organization,
-            registrant_street=whois_entry.registrant_street,
-            registrant_city=whois_entry.registrant_city,
-            registrant_state=whois_entry.registrant_state,
-            registrant_postal_code=whois_entry.registrant_postal_code,
-            registrant_country=whois_entry.registrant_country,
-            admin_name=whois_entry.admin_name,
-            admin_organization=whois_entry.admin_organization,
-            admin_street=whois_entry.admin_street,
-            admin_city=whois_entry.admin_city,
-            admin_state=whois_entry.admin_state,
-            admin_postal_code=whois_entry.admin_postal_code,
-            admin_country=whois_entry.admin_country,
-            tech_name=whois_entry.tech_name,
-            tech_organization=whois_entry.tech_organization,
-            tech_street=whois_entry.tech_street,
-            tech_city=whois_entry.tech_city,
-            tech_state=whois_entry.tech_state,
-            tech_postal_code=whois_entry.tech_postal_code,
-            tech_country=whois_entry.tech_country,
-            abuse_contact_email=whois_entry.abuse_contact_email,
-            abuse_contact_phone=whois_entry.abuse_contact_phone,
-            registrar_whois_server=whois_entry.registrar_whois_server,
-            registrar_url=whois_entry.registrar_url,
-            registrar_abuse_contact_email=whois_entry.registrar_abuse_contact_email,
-            registrar_abuse_contact_phone=whois_entry.registrar_abuse_contact_phone,
+            domain_name=getattr(whois_entry, "domain_name", None),
+            registrar=getattr(whois_entry, "registrar", None),
+            whois_server=getattr(whois_entry, "whois_server", None),
+            referral_url=getattr(whois_entry, "referral_url", None),
+            updated_date=getattr(whois_entry, "updated_date", None),
+            creation_date=getattr(whois_entry, "creation_date", None),
+            expiration_date=getattr(whois_entry, "expiration_date", None),
+            name_servers=getattr(whois_entry, "name_servers", None),
+            status=getattr(whois_entry, "status", None),
+            emails=getattr(whois_entry, "emails", None),
+            dnssec=getattr(whois_entry, "dnssec", None),
+            registrant_name=getattr(whois_entry, "registrant_name", None),
+            registrant_organization=getattr(whois_entry, "registrant_organization", None),
+            registrant_street=getattr(whois_entry, "registrant_street", None),
+            registrant_city=getattr(whois_entry, "registrant_city", None),
+            registrant_state=getattr(whois_entry, "registrant_state", None),
+            registrant_postal_code=getattr(whois_entry, "registrant_postal_code", None),
+            registrant_country=getattr(whois_entry, "registrant_country", None),
+            admin_name=getattr(whois_entry, "admin_name", None),
+            admin_organization=getattr(whois_entry, "admin_organization", None),
+            admin_street=getattr(whois_entry, "admin_street", None),
+            admin_city=getattr(whois_entry, "admin_city", None),
+            admin_state=getattr(whois_entry, "admin_state", None),
+            admin_postal_code=getattr(whois_entry, "admin_postal_code", None),
+            admin_country=getattr(whois_entry, "admin_country", None),
+            tech_name=getattr(whois_entry, "tech_name", None),
+            tech_organization=getattr(whois_entry, "tech_organization", None),
+            tech_street=getattr(whois_entry, "tech_street", None),
+            tech_city=getattr(whois_entry, "tech_city", None),
+            tech_state=getattr(whois_entry, "tech_state", None),
+            tech_postal_code=getattr(whois_entry, "tech_postal_code", None),
+            tech_country=getattr(whois_entry, "tech_country", None),
+            abuse_contact_email=getattr(whois_entry, "abuse_contact_email", None),
+            abuse_contact_phone=getattr(whois_entry, "abuse_contact_phone", None),
+            registrar_whois_server=getattr(whois_entry, "registrar_whois_server", None),
+            registrar_url=getattr(whois_entry, "registrar_url", None),
+            registrar_abuse_contact_email=getattr(whois_entry, "registrar_abuse_contact_email", None),
+            registrar_abuse_contact_phone=getattr(whois_entry, "registrar_abuse_contact_phone", None),
         )
 
     def status_code(self, *, timeout: int = 10) -> int:
@@ -203,7 +209,7 @@ class SiteSniffer:
 
         if not ssl_info_dict:
             raise SiteSnifferException(
-                f"Unable to fetch SSL certificate information from the given domain: {self.url}"
+                f"Unable to fetch SSL certificate information from the given domain: {self.url}",
             )
 
         return SSLCertInfo(
@@ -226,7 +232,9 @@ class SiteSniffer:
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.content, "html.parser")
         for img in soup.find_all("img"):
-            requests.get(urljoin(self.url, img["src"]), timeout=timeout)
+            src = img.get("src")
+            if src:
+                requests.get(urljoin(self.url, str(src)), timeout=timeout)
 
         end_time: float = time.perf_counter()
 
@@ -237,7 +245,7 @@ class SiteSniffer:
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         valid_hrefs: list[str] = [
-            link.get("href") for link in soup.find_all("a") if link.get("href")
+            str(link.get("href")) for link in soup.find_all("a") if link.get("href")
         ]
         return [
             href
@@ -260,7 +268,7 @@ class SiteSniffer:
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         return any(
-            "viewport" in tag.get("name", "").lower() for tag in soup.find_all("meta")
+            "viewport" in str(tag.get("name", "")).lower() for tag in soup.find_all("meta")
         )
 
     def has_cookies(self, *, timeout: int = 10) -> bool:
@@ -268,11 +276,18 @@ class SiteSniffer:
         return "Set-Cookie" in requests.get(self.url, timeout=timeout).headers
 
     def has_google_analytics(self, *, timeout: int = 10) -> bool:
-        """Checks whether the website is using Google Analytic."""
+        """Checks whether the website is using Google Analytics."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
         return any(
-            "google-analytics.com/analytics.js" in tag.get("src", "").lower()
+            any(
+                ga in str(tag.get("src", "")).lower()
+                for ga in (
+                    "google-analytics.com/analytics.js",
+                    "googletagmanager.com/gtag/js",
+                    "google-analytics.com/ga.js",
+                )
+            )
             for tag in soup.find_all("script")
         )
 
@@ -284,26 +299,31 @@ class SiteSniffer:
         """Returns the meta description for the webpage, given its URL."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
-        meta_description: Optional[bs4.Tag | bs4.NavigableString] = soup.find(
+        meta_description: Optional[bs4.Tag] = soup.find(
             "meta",
-            attrs={"name": "description"},
+            attrs={"name": re.compile(r"^description$", re.IGNORECASE)},
         )
-        return meta_description.get("content") if meta_description else []  # type: ignore
+        if meta_description and meta_description.get("content") is not None:
+            return meta_description.get("content")
+        return []
 
     def has_meta_description(self, *, timeout: int = 10) -> bool:
-        """Checks whether the website is a meta description."""
+        """Checks whether the website has a meta description."""
         return bool(self.page_meta_description(timeout=timeout))
 
     def page_keywords(self, *, timeout: int = 10) -> str | list[str] | Any:
         """Returns the meta keywords for the webpage, given its URL."""
         response: requests.Response = requests.get(self.url, timeout=timeout)
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.text, "html.parser")
-        meta_keywords: Optional[bs4.Tag | bs4.NavigableString] = soup.find(
+        meta_keywords: Optional[bs4.Tag] = soup.find(
             "meta",
-            attrs={"name": "keywords"},
+            attrs={"name": re.compile(r"^keywords$", re.IGNORECASE)},
         )
-        return meta_keywords.get("content") if meta_keywords else []  # type: ignore
+        if meta_keywords and meta_keywords.get("content") is not None:
+            return meta_keywords.get("content")
+        return []
 
     def has_keywords(self, *, timeout: int = 10) -> bool:
         """Checks whether the website has keywords."""
         return bool(self.page_keywords(timeout=timeout))
+

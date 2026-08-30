@@ -38,10 +38,12 @@ from sitesniffer.exceptions import SiteSnifferException
         "http://example.com?key=value",
         "https://example.com/#fragment",
         "https://xn--mnchen-3ya.de/",
+        "https://münchen.de/",
+        "https://münchen.de/path/to/page?q=1",
     ],
 )
 def test_valid_urls(valid_url: str) -> None:
-    """Verify that all valid URL formats are accepted."""
+    """Verify that all valid URL formats are accepted, including IDNs."""
     sniffer = SiteSniffer(valid_url)
     assert sniffer.url == valid_url
     assert isinstance(sniffer.url, str)
@@ -63,7 +65,6 @@ def test_valid_urls(valid_url: str) -> None:
         "just a text string",
         "http:// invalid space .com",
         "https://example.com#fragment",  # Legacy regex requires '/' or '?' before '#'
-        "https://münchen.de/",  # Legacy regex only allows ASCII [A-Z0-9] in domain
     ],
 )
 def test_invalid_urls(invalid_url: str) -> None:
@@ -85,8 +86,8 @@ def test_repr(sniffer: SiteSniffer, sample_url: str) -> None:
     assert isinstance(repr(sniffer), str)
 
 
-def test_hash(sniffer: SiteSniffer, sample_url: str) -> None:
-    """Verify __hash__ consistency and legacy object equality behavior."""
+def test_hash_and_equality(sniffer: SiteSniffer, sample_url: str) -> None:
+    """Verify __hash__ and __eq__ consistency, sets, and dict keys support."""
     expected_hash = hash((SiteSniffer, sample_url))
     assert hash(sniffer) == expected_hash
     assert isinstance(hash(sniffer), int)
@@ -94,17 +95,24 @@ def test_hash(sniffer: SiteSniffer, sample_url: str) -> None:
     sniffer_same = SiteSniffer(sample_url)
     sniffer_diff = SiteSniffer("https://another.example.com/")
 
-    # Hashes of instances with identical URLs are equal
+    # Hash equality
     assert hash(sniffer) == hash(sniffer_same)
     assert hash(sniffer) != hash(sniffer_diff)
 
-    # In legacy SiteSniffer, __eq__ is not defined, so equality falls back to object identity (is)
-    assert sniffer is not sniffer_same
-    assert (sniffer == sniffer_same) is False
+    # Object equality
+    assert sniffer == sniffer_same
+    assert sniffer != sniffer_diff
+    assert (sniffer == "https://www.example.com/example/") is False
+    assert (sniffer == 123) is False
 
-    # Set membership with the exact instance
+    # Set membership
     s = {sniffer}
-    assert sniffer in s
+    assert sniffer_same in s
+    assert sniffer_diff not in s
+
+    # Dict keys
+    d = {sniffer: "value"}
+    assert d[sniffer_same] == "value"
 
 
 def test_pickle_roundtrip(sniffer: SiteSniffer) -> None:
@@ -118,7 +126,7 @@ def test_pickle_roundtrip(sniffer: SiteSniffer) -> None:
 
 def test_slots_and_attribute_access(sniffer: SiteSniffer) -> None:
     """Verify slots configuration and attributes."""
-    assert SiteSniffer.__slots__ == ("_url", "__dict__")
+    assert set(SiteSniffer.__slots__) == {"_url", "__dict__"}
     assert sniffer._url == "https://www.example.com/example/"
 
     # Custom attributes are allowed because "__dict__" is in __slots__
@@ -375,8 +383,7 @@ def test_ssl_info(sniffer: SiteSniffer, sample_ssl_cert_dict: dict[str, Any]) ->
 
 def test_ssl_info_idn_hostname(sample_ssl_cert_dict: dict[str, Any]) -> None:
     """Verify ssl_info punycode-encodes non-ASCII internationalized domain names."""
-    # Since init validates ASCII domains, we test when extract_hostname returns an IDN or punycode URL
-    sniffer = SiteSniffer("https://xn--mnchen-3ya.de/")
+    idn_sniffer = SiteSniffer("https://münchen.de/")
     mock_sock = MagicMock()
     mock_ssl_sock = MagicMock()
     mock_ssl_sock.getpeercert.return_value = sample_ssl_cert_dict
@@ -384,11 +391,11 @@ def test_ssl_info_idn_hostname(sample_ssl_cert_dict: dict[str, Any]) -> None:
     mock_ssl_context = MagicMock()
     mock_ssl_context.wrap_socket.return_value.__enter__.return_value = mock_ssl_sock
 
-    with patch.object(sniffer, "extract_hostname", return_value="münchen.de"), patch(
-        "socket.create_connection",
-    ) as mock_conn, patch("ssl.create_default_context", return_value=mock_ssl_context):
+    with patch("socket.create_connection") as mock_conn, patch(
+        "ssl.create_default_context", return_value=mock_ssl_context,
+    ):
         mock_conn.return_value.__enter__.return_value = mock_sock
-        sniffer.ssl_info()
+        idn_sniffer.ssl_info()
 
         # "münchen.de" encodes to "xn--mnchen-3ya.de" via idna.encode
         expected_hostname = "xn--mnchen-3ya.de"
@@ -458,6 +465,21 @@ def test_load_time_no_images(sniffer: SiteSniffer, empty_html_content: str) -> N
         mock_get.assert_called_once_with(sniffer.url, timeout=10)
         assert load_time == 0.46
         assert isinstance(load_time, float)
+
+
+def test_load_time_img_without_src(sniffer: SiteSniffer) -> None:
+    """Verify load_time ignores img tags that lack a src attribute."""
+    html_without_src = '<html><body><img alt="No src"><img src="/valid.png"></body></html>'
+    page_resp = MagicMock()
+    page_resp.content = html_without_src.encode("utf-8")
+    img_resp = MagicMock()
+
+    with patch("requests.get", side_effect=[page_resp, img_resp]) as mock_get, patch(
+        "time.perf_counter", side_effect=[1.0, 2.0],
+    ):
+        load_time = sniffer.load_time()
+        assert mock_get.call_count == 2
+        assert load_time == 1.0
 
 
 # -----------------------------------------------------------------------------
@@ -574,13 +596,25 @@ def test_has_cookies_false(sniffer: SiteSniffer) -> None:
 
 
 def test_has_google_analytics(sniffer: SiteSniffer, rich_html_content: str, empty_html_content: str) -> None:
-    """Verify has_google_analytics detects analytics.js in script tags."""
+    """Verify has_google_analytics detects analytics.js, gtag.js, and ga.js in script tags."""
     resp_positive = MagicMock()
     resp_positive.text = rich_html_content
 
     with patch("requests.get", return_value=resp_positive):
         assert sniffer.has_google_analytics() is True
         assert isinstance(sniffer.has_google_analytics(), bool)
+
+    # Test modern Google Tag Manager gtag.js script
+    gtag_resp = MagicMock()
+    gtag_resp.text = '<html><head><script src="https://www.googletagmanager.com/gtag/js?id=G-12345"></script></head></html>'
+    with patch("requests.get", return_value=gtag_resp):
+        assert sniffer.has_google_analytics() is True
+
+    # Test legacy ga.js script
+    ga_resp = MagicMock()
+    ga_resp.text = '<html><head><script src="https://ssl.google-analytics.com/ga.js"></script></head></html>'
+    with patch("requests.get", return_value=ga_resp):
+        assert sniffer.has_google_analytics() is True
 
     resp_negative = MagicMock()
     resp_negative.text = empty_html_content
@@ -607,6 +641,28 @@ def test_page_meta_description_present(sniffer: SiteSniffer, rich_html_content: 
         assert sniffer.has_meta_description(timeout=5) is True
 
 
+def test_page_meta_description_case_insensitive(sniffer: SiteSniffer) -> None:
+    """Verify page_meta_description works with mixed-case attribute names."""
+    resp = MagicMock()
+    resp.text = '<html><head><meta name="Description" content="Case Insensitive Description"></head></html>'
+
+    with patch("requests.get", return_value=resp):
+        desc = sniffer.page_meta_description()
+        assert desc == "Case Insensitive Description"
+        assert sniffer.has_meta_description() is True
+
+
+def test_page_meta_description_missing_content(sniffer: SiteSniffer) -> None:
+    """Verify page_meta_description returns empty list [] when content attribute is omitted."""
+    resp = MagicMock()
+    resp.text = '<html><head><meta name="description"></head></html>'
+
+    with patch("requests.get", return_value=resp):
+        desc = sniffer.page_meta_description()
+        assert desc == []
+        assert sniffer.has_meta_description() is False
+
+
 def test_page_meta_description_missing(sniffer: SiteSniffer, empty_html_content: str) -> None:
     """Verify page_meta_description returns exact empty list [] when missing (legacy behavior)."""
     resp = MagicMock()
@@ -631,6 +687,28 @@ def test_page_keywords_present(sniffer: SiteSniffer, rich_html_content: str) -> 
         assert keywords == "example, sitesniffer, testing, python"
         assert isinstance(keywords, str)
         assert sniffer.has_keywords(timeout=5) is True
+
+
+def test_page_keywords_case_insensitive(sniffer: SiteSniffer) -> None:
+    """Verify page_keywords works with uppercase attribute names."""
+    resp = MagicMock()
+    resp.text = '<html><head><meta NAME="KEYWORDS" content="python, test, idn"></head></html>'
+
+    with patch("requests.get", return_value=resp):
+        keywords = sniffer.page_keywords()
+        assert keywords == "python, test, idn"
+        assert sniffer.has_keywords() is True
+
+
+def test_page_keywords_missing_content(sniffer: SiteSniffer) -> None:
+    """Verify page_keywords returns empty list [] when content attribute is omitted."""
+    resp = MagicMock()
+    resp.text = '<html><head><meta name="keywords"></head></html>'
+
+    with patch("requests.get", return_value=resp):
+        keywords = sniffer.page_keywords()
+        assert keywords == []
+        assert sniffer.has_keywords() is False
 
 
 def test_page_keywords_missing(sniffer: SiteSniffer, empty_html_content: str) -> None:

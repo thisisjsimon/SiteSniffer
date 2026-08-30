@@ -5,9 +5,9 @@ The class has five attributes, all of which are of the same type: WhoisEntry. Wh
 """
 from __future__ import annotations
 
-from typing import Any, Iterator, TypeAlias, Optional, NamedTuple
+from typing import Any, NamedTuple, Optional, TypeAlias
 
-__all__: list = ["DomainInfo", "SSLCertInfo", "WhoisEntry", "SSLCertDictEntry"]
+__all__: list = ["DomainInfo", "SSLCertDictEntry", "SSLCertInfo", "WhoisEntry"]
 
 WhoisEntry: TypeAlias = Any  # TypeAlias for type readability
 SSLCertDictEntry: TypeAlias = (
