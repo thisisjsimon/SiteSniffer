@@ -3,6 +3,7 @@
 """Contains the SiteSniffer class."""
 from __future__ import annotations
 
+import contextlib
 import re
 import socket
 import ssl
@@ -139,11 +140,12 @@ class SiteSniffer:
         ip_addresses = {}
         for result in socket.getaddrinfo(domain, 0, flags=socket.AI_CANONNAME):
             ip_version = result[0]
-            ip_address = result[4][0]
-            if ip_version == socket.AF_INET:
-                ip_addresses["ipv4"] = ip_address
-            elif ip_version == socket.AF_INET6:
-                ip_addresses["ipv6"] = ip_address
+            if len(result) > 4 and result[4]:
+                ip_address = result[4][0]
+                if ip_version == socket.AF_INET:
+                    ip_addresses["ipv4"] = ip_address
+                elif ip_version == socket.AF_INET6:
+                    ip_addresses["ipv6"] = ip_address
         return ip_addresses
 
     def domain_info(self) -> DomainInfo:
@@ -213,16 +215,16 @@ class SiteSniffer:
             )
 
         return SSLCertInfo(
-            subject=ssl_info_dict["subject"],
-            issuer=ssl_info_dict["issuer"],
-            version=ssl_info_dict["version"],
-            serial_number=ssl_info_dict["serialNumber"],
-            not_before=ssl_info_dict["notBefore"],
-            not_after=ssl_info_dict["notAfter"],
-            subject_alt_name=ssl_info_dict["subjectAltName"],
-            ocsp=ssl_info_dict["OCSP"],
-            ca_issuers=ssl_info_dict["caIssuers"],
-            clr_distribution_points=ssl_info_dict["crlDistributionPoints"],
+            subject=ssl_info_dict.get("subject"),
+            issuer=ssl_info_dict.get("issuer"),
+            version=ssl_info_dict.get("version"),
+            serial_number=ssl_info_dict.get("serialNumber"),
+            not_before=ssl_info_dict.get("notBefore"),
+            not_after=ssl_info_dict.get("notAfter"),
+            subject_alt_name=ssl_info_dict.get("subjectAltName"),
+            ocsp=ssl_info_dict.get("OCSP"),
+            ca_issuers=ssl_info_dict.get("caIssuers"),
+            clr_distribution_points=ssl_info_dict.get("crlDistributionPoints"),
         )
 
     def load_time(self, *, ndigits: int = 3, timeout: int = 10) -> float:
@@ -233,8 +235,9 @@ class SiteSniffer:
         soup: bs4.BeautifulSoup = bs4.BeautifulSoup(response.content, "html.parser")
         for img in soup.find_all("img"):
             src = img.get("src")
-            if src:
-                requests.get(urljoin(self.url, str(src)), timeout=timeout)
+            if src and str(src).strip():
+                with contextlib.suppress(requests.RequestException):
+                    requests.get(urljoin(self.url, str(src)), timeout=timeout)
 
         end_time: float = time.perf_counter()
 
@@ -247,10 +250,12 @@ class SiteSniffer:
         valid_hrefs: list[str] = [
             str(link.get("href")) for link in soup.find_all("a") if link.get("href")
         ]
+        protocol = self.extract_protocol() or ""
+        hostname = self.extract_hostname() or ""
         return [
             href
             if href.startswith("http") or href.startswith(self.url)
-            else self.extract_protocol() + self.extract_hostname() + href
+            else protocol + hostname + href
             for href in valid_hrefs
         ]
 

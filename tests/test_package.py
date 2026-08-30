@@ -7,7 +7,7 @@ from sitesniffer import SiteSniffer
 def test_package_metadata() -> None:
     """Verify package-level metadata attributes and exports."""
     assert sitesniffer.__all__ == ["SiteSniffer"]
-    assert sitesniffer.__version__ == "0.5.0"
+    assert sitesniffer.__version__ == "0.5.1"
     assert sitesniffer.__author__ == "Jonah Simon"
     assert sitesniffer.__email__ == "thisisjsimon.github@gmail.com"
     assert sitesniffer.__title__ == "sitesniffer"

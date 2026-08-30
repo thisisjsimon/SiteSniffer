@@ -6,6 +6,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from sitesniffer import SiteSniffer
 from sitesniffer.data import DomainInfo, SSLCertInfo
@@ -266,6 +267,17 @@ def test_ip_address_empty(sniffer: SiteSniffer) -> None:
         assert result == {}
 
 
+def test_ip_address_short_or_empty_sockaddr(sniffer: SiteSniffer) -> None:
+    """Verify ip_address safely handles malformed addrinfo tuples without IndexError."""
+    mock_addrinfo = [
+        (socket.AF_INET, socket.SOCK_STREAM, 6, "", ()),  # empty sockaddr
+        (socket.AF_INET,),  # short tuple
+    ]
+    with patch("socket.getaddrinfo", return_value=mock_addrinfo):
+        result = sniffer.ip_address()
+        assert result == {}
+
+
 # -----------------------------------------------------------------------------
 # Domain Info Tests
 # -----------------------------------------------------------------------------
@@ -423,6 +435,43 @@ def test_ssl_info_empty_peer_cert(sniffer: SiteSniffer) -> None:
         assert "Unable to fetch SSL certificate information" in str(exc_info.value)
 
 
+def test_ssl_info_missing_optional_fields(sniffer: SiteSniffer) -> None:
+    """Verify ssl_info handles certificates missing optional fields (OCSP, caIssuers, CRL, SAN)."""
+    minimal_cert_dict = {
+        "subject": ((("commonName", "example.com"),),),
+        "issuer": ((("commonName", "Example CA"),),),
+        "version": 3,
+        "serialNumber": "A1B2C3D4",
+        "notBefore": "Jan 01 00:00:00 2024 GMT",
+        "notAfter": "Jan 01 00:00:00 2025 GMT",
+        # Missing: subjectAltName, OCSP, caIssuers, crlDistributionPoints
+    }
+    mock_sock = MagicMock()
+    mock_ssl_sock = MagicMock()
+    mock_ssl_sock.getpeercert.return_value = minimal_cert_dict
+
+    mock_ssl_context = MagicMock()
+    mock_ssl_context.wrap_socket.return_value.__enter__.return_value = mock_ssl_sock
+
+    with patch("socket.create_connection") as mock_conn, patch(
+        "ssl.create_default_context", return_value=mock_ssl_context,
+    ):
+        mock_conn.return_value.__enter__.return_value = mock_sock
+        cert_info = sniffer.ssl_info()
+
+        assert isinstance(cert_info, SSLCertInfo)
+        assert cert_info.subject == minimal_cert_dict["subject"]
+        assert cert_info.issuer == minimal_cert_dict["issuer"]
+        assert cert_info.version == 3
+        assert cert_info.serial_number == "A1B2C3D4"
+        assert cert_info.not_before == "Jan 01 00:00:00 2024 GMT"
+        assert cert_info.not_after == "Jan 01 00:00:00 2025 GMT"
+        assert cert_info.subject_alt_name is None
+        assert cert_info.ocsp is None
+        assert cert_info.ca_issuers is None
+        assert cert_info.clr_distribution_points is None
+
+
 # -----------------------------------------------------------------------------
 # Page Load Time Tests
 # -----------------------------------------------------------------------------
@@ -482,6 +531,22 @@ def test_load_time_img_without_src(sniffer: SiteSniffer) -> None:
         assert load_time == 1.0
 
 
+def test_load_time_with_failing_image(sniffer: SiteSniffer) -> None:
+    """Verify load_time continues calculating load time even if an image request raises RequestException."""
+    html_with_broken_img = '<html><body><img src="/broken.png"><img src="/working.png"></body></html>'
+    page_resp = MagicMock()
+    page_resp.content = html_with_broken_img.encode("utf-8")
+    working_resp = MagicMock()
+
+    with patch(
+        "requests.get",
+        side_effect=[page_resp, requests.exceptions.ConnectionError("404"), working_resp],
+    ) as mock_get, patch("time.perf_counter", side_effect=[10.0, 11.5]):
+        load_time = sniffer.load_time()
+        assert mock_get.call_count == 3
+        assert load_time == 1.5
+
+
 # -----------------------------------------------------------------------------
 # Links Extraction Tests
 # -----------------------------------------------------------------------------
@@ -513,6 +578,17 @@ def test_links_empty(sniffer: SiteSniffer, empty_html_content: str) -> None:
 
     with patch("requests.get", return_value=resp):
         assert sniffer.links() == []
+
+
+def test_links_with_ftp_url() -> None:
+    """Verify links handles URLs with None protocol (like FTP) safely without TypeError."""
+    ftp_sniffer = SiteSniffer("ftp://ftp.example.org/files")
+    resp = MagicMock()
+    resp.text = '<html><body><a href="https://example.com">Ext</a><a href="/rel/path">Rel</a></body></html>'
+
+    with patch("requests.get", return_value=resp):
+        links_list = ftp_sniffer.links()
+        assert links_list == ["https://example.com", "ftp:/rel/path"]
 
 
 # -----------------------------------------------------------------------------

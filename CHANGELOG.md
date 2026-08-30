@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-08-30
+
+### Fixed
+- Fixed a `KeyError` vulnerability in `ssl_info()` by using safe `.get()` lookups for optional certificate extensions (`OCSP`, `caIssuers`, `crlDistributionPoints`, `subjectAltName`).
+- Added tuple boundary safety checks in `ip_address()` to prevent `IndexError` on malformed DNS resolver responses.
+- Prevented `TypeError` in `links()` for non-HTTP protocols (such as FTP) by safely handling potential `None` return values during URL formatting.
+- Wrapped sub-resource image requests in `load_time()` with `contextlib.suppress(requests.RequestException)` to gracefully handle broken links or failing images on live websites.
+
+---
+
 ## [0.5.0] - 2026-08-30
 
 ### Added
@@ -28,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed `ImportError` on Python 3.10 caused by `from typing import Self`.
 - Fixed `AttributeError` vulnerabilities in `domain_info()` by using safe attribute lookup across varying WHOIS registrar responses.
-- Fixed `load_time()` handling when HTML `<img>` tags omit the `src` attribute.
 
 ### Removed
 - Removed legacy `setup.py` and `requirements.txt` build files in favor of standard `pyproject.toml`.

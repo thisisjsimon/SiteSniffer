@@ -68,13 +68,13 @@ class DomainInfo(NamedTuple):
 class SSLCertInfo(NamedTuple):
     """Dataclass containing the SSL certificate information."""
 
-    subject: SSLCertDictEntry
-    issuer: SSLCertDictEntry
-    version: SSLCertDictEntry
-    serial_number: SSLCertDictEntry
-    not_before: SSLCertDictEntry
-    not_after: SSLCertDictEntry
-    subject_alt_name: SSLCertDictEntry
-    ocsp: SSLCertDictEntry
-    ca_issuers: SSLCertDictEntry
-    clr_distribution_points: SSLCertDictEntry
+    subject: Optional[SSLCertDictEntry] = None
+    issuer: Optional[SSLCertDictEntry] = None
+    version: Optional[SSLCertDictEntry] = None
+    serial_number: Optional[SSLCertDictEntry] = None
+    not_before: Optional[SSLCertDictEntry] = None
+    not_after: Optional[SSLCertDictEntry] = None
+    subject_alt_name: Optional[SSLCertDictEntry] = None
+    ocsp: Optional[SSLCertDictEntry] = None
+    ca_issuers: Optional[SSLCertDictEntry] = None
+    clr_distribution_points: Optional[SSLCertDictEntry] = None
