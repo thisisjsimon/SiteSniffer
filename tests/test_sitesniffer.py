@@ -208,7 +208,7 @@ def test_ip_address_dual_stack(sniffer: SiteSniffer) -> None:
     with patch("socket.getaddrinfo", return_value=mock_addrinfo) as mock_getaddr:
         result = sniffer.ip_address()
         mock_getaddr.assert_called_once_with(
-            "www.example.com", 0, flags=socket.AI_CANONNAME
+            "www.example.com", 0, flags=socket.AI_CANONNAME,
         )
         assert isinstance(result, dict)
         assert result == {
@@ -342,7 +342,7 @@ def test_ssl_info(sniffer: SiteSniffer, sample_ssl_cert_dict: dict[str, Any]) ->
     mock_ssl_context.wrap_socket.return_value.__enter__.return_value = mock_ssl_sock
 
     with patch("socket.create_connection") as mock_conn, patch(
-        "ssl.create_default_context", return_value=mock_ssl_context
+        "ssl.create_default_context", return_value=mock_ssl_context,
     ):
         mock_conn.return_value.__enter__.return_value = mock_sock
 
@@ -350,7 +350,7 @@ def test_ssl_info(sniffer: SiteSniffer, sample_ssl_cert_dict: dict[str, Any]) ->
 
         mock_conn.assert_called_once_with(("www.example.com", 443))
         mock_ssl_context.wrap_socket.assert_called_once_with(
-            mock_sock, server_hostname="www.example.com"
+            mock_sock, server_hostname="www.example.com",
         )
         assert isinstance(cert_info, SSLCertInfo)
         assert len(cert_info) == 10
@@ -385,7 +385,7 @@ def test_ssl_info_idn_hostname(sample_ssl_cert_dict: dict[str, Any]) -> None:
     mock_ssl_context.wrap_socket.return_value.__enter__.return_value = mock_ssl_sock
 
     with patch.object(sniffer, "extract_hostname", return_value="münchen.de"), patch(
-        "socket.create_connection"
+        "socket.create_connection",
     ) as mock_conn, patch("ssl.create_default_context", return_value=mock_ssl_context):
         mock_conn.return_value.__enter__.return_value = mock_sock
         sniffer.ssl_info()
@@ -394,7 +394,7 @@ def test_ssl_info_idn_hostname(sample_ssl_cert_dict: dict[str, Any]) -> None:
         expected_hostname = "xn--mnchen-3ya.de"
         mock_conn.assert_called_once_with((expected_hostname, 443))
         mock_ssl_context.wrap_socket.assert_called_once_with(
-            mock_sock, server_hostname=expected_hostname
+            mock_sock, server_hostname=expected_hostname,
         )
 
 
@@ -408,7 +408,7 @@ def test_ssl_info_empty_peer_cert(sniffer: SiteSniffer) -> None:
     mock_ssl_context.wrap_socket.return_value.__enter__.return_value = mock_ssl_sock
 
     with patch("socket.create_connection") as mock_conn, patch(
-        "ssl.create_default_context", return_value=mock_ssl_context
+        "ssl.create_default_context", return_value=mock_ssl_context,
     ):
         mock_conn.return_value.__enter__.return_value = mock_sock
         with pytest.raises(SiteSnifferException) as exc_info:
@@ -429,7 +429,7 @@ def test_load_time_with_images(sniffer: SiteSniffer, rich_html_content: str) -> 
 
     # Requests: 1 for page + 2 for images in rich_html_content
     with patch("requests.get", side_effect=[page_resp, img_resp, img_resp]) as mock_get, patch(
-        "time.perf_counter", side_effect=[100.0, 101.23456]
+        "time.perf_counter", side_effect=[100.0, 101.23456],
     ):
         load_time = sniffer.load_time(ndigits=3, timeout=5)
 
@@ -452,7 +452,7 @@ def test_load_time_no_images(sniffer: SiteSniffer, empty_html_content: str) -> N
     page_resp.content = empty_html_content.encode("utf-8")
 
     with patch("requests.get", return_value=page_resp) as mock_get, patch(
-        "time.perf_counter", side_effect=[10.0, 10.45678]
+        "time.perf_counter", side_effect=[10.0, 10.45678],
     ):
         load_time = sniffer.load_time(ndigits=2)
         mock_get.assert_called_once_with(sniffer.url, timeout=10)

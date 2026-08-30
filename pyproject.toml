@@ -1,32 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sitesniffer"
+dynamic = ["version"]
+description = "A tool to extract various information about a website, including its IP address, SSL certificate information, domain information, page load time, and other useful insights."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Jonah Simon", email = "thisisjsimon.github@gmail.com" },
+]
+requires-python = ">=3.10"
+keywords = [
+    "sniffing",
+    "site sniffing",
+    "website sniffing",
+    "IP address",
+    "SSL certificate",
+    "domain",
+    "website",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Security",
+]
+dependencies = [
+    "beautifulsoup4>=4.12.0",
+    "idna>=3.7",
+    "python-whois>=0.9.4",
+    "requests>=2.32.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/thisisjsimon/SiteSniffer"
+Repository = "https://github.com/thisisjsimon/SiteSniffer"
+Issues = "https://github.com/thisisjsimon/SiteSniffer/issues"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+    "types-requests>=2.32.0",
+]
+
+[tool.hatch.version]
+path = "src/sitesniffer/__init__.py"
+pattern = '^__version__(?::\s*str)?\s*=\s*"(?P<version>[^"]+)"'
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sitesniffer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --cov=src/sitesniffer --cov-branch --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/sitesniffer"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+
 [tool.mypy]
 strict = false
+python_version = "3.10"
 
 [tool.ruff]
-extend-select = [
-    "F", 
-    "A", 
-    "B", 
-    "INP", 
-    "I", 
-    "PYI", 
-    "RSE", 
-    "RET", 
-    "Q", 
-    "SLF", 
-    "SIM", 
-    "TID", 
-    "TCH", 
-    "ARG", 
-    "PL", 
-    "RUF",
-    "C4",
-    "G",
-    "COM",
-    "BLE",
-    "FBT"
-]
-ignore = ["E501", "BLE001", "INP001", "PLR2004", "SLF001", "E1101"]
-unfixable = []
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+target-version = "py310"
 show-fixes = true
-target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "F", "A", "B", "INP", "I", "PYI", "RSE", "RET", "Q", "SLF",
+    "SIM", "TID", "TCH", "ARG", "PL", "RUF", "C4", "G", "COM", "BLE", "FBT"
+]
+ignore = ["E501", "BLE001", "INP001", "PLR2004", "SLF001"]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
